@@ -1,8 +1,7 @@
-package com.example.batteryremain.ui
+package com.example.batteryremain.ui.main
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-
 
 class MainViewModel : ViewModel() {
     var data: MutableLiveData<Int> = MutableLiveData<Int>()
