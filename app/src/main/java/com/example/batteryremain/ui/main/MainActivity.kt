@@ -21,6 +21,10 @@ class MainActivity : AppCompatActivity(), ViewInit {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         initView()
+
+        viewModel.data.observe(this) {
+            binding.textView.text = "배터리 잔량 : $it %"
+        }
     }
 
     override fun initView() {
@@ -41,10 +45,6 @@ class MainActivity : AppCompatActivity(), ViewInit {
             addAction(Intent.ACTION_BATTERY_CHANGED)
         }
         this.registerReceiver(batteryReceiver, filter)
-
-        viewModel.data.observe(this) {
-            binding.textView.text = "배터리 잔량 : $it %"
-        }
     }
 
     private fun unRegisterBatteryReceiver() {
