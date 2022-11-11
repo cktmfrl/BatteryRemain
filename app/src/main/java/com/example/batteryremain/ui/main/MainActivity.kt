@@ -2,6 +2,7 @@ package com.example.batteryremain.ui.main
 
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
@@ -9,6 +10,8 @@ import com.example.batteryremain.receiver.BatteryBroadCastReceiver
 import com.example.batteryremain.databinding.ActivityMainBinding
 import com.example.batteryremain.receiver.ScreenBroadCastReceiver
 import com.example.batteryremain.ui.ViewInit
+import com.example.batteryremain.utils.getNetworkCallback
+
 
 class MainActivity : AppCompatActivity(), ViewInit {
     private lateinit var binding: ActivityMainBinding
@@ -16,6 +19,10 @@ class MainActivity : AppCompatActivity(), ViewInit {
 
     private var batteryReceiver: BatteryBroadCastReceiver? = null
     private var screenReceiver: ScreenBroadCastReceiver? = null
+
+    private lateinit var connectivityManager: ConnectivityManager
+    private lateinit var networkCallback: ConnectivityManager.NetworkCallback
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,14 +38,17 @@ class MainActivity : AppCompatActivity(), ViewInit {
         setContentView(binding.root)
         registerScreenReceiver()
         registerBatteryReceiver()
+        registerNetworkCallback()
     }
 
     override fun onDestroy() {
-        unRegisterScreenReceiver()
+        unregisterNetworkCallback()
         unRegisterBatteryReceiver()
+        unRegisterScreenReceiver()
         super.onDestroy()
     }
 
+    // Broadcast Receiver
     private fun registerBatteryReceiver() {
         batteryReceiver = BatteryBroadCastReceiver(viewModel)
         val filter = IntentFilter().apply {
@@ -76,6 +86,26 @@ class MainActivity : AppCompatActivity(), ViewInit {
             } finally {
                 screenReceiver = null
             }
+        }
+    }
+
+    // Network
+    private fun registerNetworkCallback() {
+        connectivityManager = getSystemService(ConnectivityManager::class.java)
+        networkCallback = getNetworkCallback(this)
+
+        val request = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI) // Wi-fi
+            //.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR) // 무선 네트워크
+            .build()
+
+        //connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        connectivityManager.registerNetworkCallback(request, networkCallback)
+    }
+
+    private fun unregisterNetworkCallback() {
+        if (networkCallback != null) {
+            connectivityManager.unregisterNetworkCallback(networkCallback)
         }
     }
 
